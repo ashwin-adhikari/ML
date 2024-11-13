@@ -139,3 +139,151 @@ In Machine Learning and AI:
 
 - Model Behavior Analysis:<br> In algorithms like SVM, derivatives help formulate the optimization problem, and in decision trees, they can assist in node splitting and feature importance analysis.
 
+
+# Integrals
+
+Integrals find extensive applications in ML and AI for:
+
+- Optimization Problems: Integrals are used in calculating areas under the curve in ROC analysis, integral representations in loss functions, and in regularization terms to prevent overfitting.
+
+- Understanding Data Distributions: Integrals help in defining continuous probability distributions, essential for calculating probabilities and expectations in statistical models.
+
+- Deep Learning: In neural networks, integrals appear in backpropagation algorithms for computing gradients and in defining activation functions.
+
+
+``sympy`` is used for integrals as well.
+```
+from sympy import *
+import sympy as sp
+
+x = sp.symbols('x')
+function = x**2
+
+integral = function.integrate(x)
+```
+
+>``lambdify`` converts a symbolic SymPy expression into a numerical function that can take specific values as inputs.
+
+
+>``linspace`` generates a specified number of equally spaced values between two endpoints.
+
+
+
+# Probability and statistics
+
+In python they are implemented via these libraries
+```
+import numpy as np
+import scipy.stats as stats
+import pandas as pd
+import matplotlib.pyplot as plt
+```
+
+>``scipy.stats (stats)``: Provides functions for statistical analysis, including measures of central tendency, dispersion, and hypothesis testing.
+
+> ``pandas (pd)``: Used for data manipulation and analysis.
+
+## 1. Sample Data and Central Tendency Calculations
+```
+# Sample data
+data = np.array([1, 2, 3, 4, 5, 6, 7, 8, 9, 10])
+
+# Central Tendency
+mean = np.mean(data)
+median = np.median(data)
+mode = stats.mode(data)[0]
+```
+>**Mean** (``np.mean(data)``): Calculates the average of data.
+
+>**Median** (``np.median(data)``): Finds the middle value of data when sorted.
+
+>**Mode** (``stats.mode(data)[0]``): Calculates the mode (most frequently occurring value) in data. The [0] extracts the mode value itself from the output tuple returned by stats.mode.
+
+## 2. Dispersion Calculations
+```
+range_ = np.ptp(data)
+variance = np.var(data)
+std_dev = np.std(data)
+```
+>**Range** (``np.ptp(data)``): Computes the range (peak-to-peak) as the difference between the maximum and minimum values.
+
+
+> **Variance** (``np.var(data)``): Measures the average squared deviation from the mean, providing an idea of data spread.
+
+
+>**Standard Deviation** ``(np.std(data))``: Measures the spread of data from the mean, in the same units as data, making it easier to interpret.
+
+
+> Dispersion measures show how spread out data is. For example, high variance or standard deviation indicates data points that vary widely from the mean, while low values indicate data close to the mean.
+
+## 3. Normal Distribution Example
+```
+# Parameters
+mu, sigma = 0, 0.1
+
+# Generating random values
+s = np.random.normal(mu, sigma, 1000)
+```
+
+>**_mu (mean)_** and **_sigma (standard deviation)_** are set to 0 and 0.1, respectively.
+
+
+> **Random Sampling**: ``np.random.normal(mu, sigma, 1000) ``generates 1000 values from a normal (Gaussian) distribution centered at mu with spread determined by sigma.
+
+>The normal distribution is fundamental in statistics as many real-world phenomena follow it. This function allows us to simulate such data for analysis or testing.
+
+## 4.  Binomial Distribution Example
+```
+# Parameters
+n, p = 10, 0.5
+
+# Generating random values
+s = np.random.binomial(n, p, 1000)
+```
+>**_n (number of trials)_** and **_p (probability of success)_** define a binomial distribution with 10 trials and a success probability of 0.5.
+
+
+>**Random Sampling**: ``np.random.binomial(n, p, 1000)`` generates 1000 values from this binomial distribution.
+
+>The binomial distribution is useful for modeling scenarios with binary outcomes (e.g., success/failure) in repeated trials. It helps in analyzing discrete random events.
+
+
+## 5. Poisson Distribution Example
+```
+# Parameters
+lambda_ = 5
+
+# Generating random values
+s = np.random.poisson(lambda_, 1000)
+```
+>``lambda_`` represents the expected number of occurrences in a fixed interval (mean rate of events).
+
+
+>**Random Sampling**: ``np.random.poisson(lambda_, 1000)`` generates 1000 values from a Poisson distribution with mean ``lambda_``
+
+>The Poisson distribution is valuable for modeling rare events, like customer arrivals in queues or call frequencies. It applies to counts or events in fixed intervals.
+
+## 6. Inferential Statistics - Hypothesis Testing Example
+```
+# Parameters
+mu_0 = 5
+alpha = 0.05  # Significance level
+
+# T-test
+t_statistic, p_value = stats.ttest_1samp(data, mu_0)
+```
+>**Null Hypothesis (H0)**: The sample data has a population mean of ``mu_0`` (5 in this case).
+
+
+>**Alternative Hypothesis (H1)**: The sample data does not have a mean of mu_0.
+
+
+>**Significance Level** (``alpha = 0.05``): Sets a threshold (5%) for rejecting the null hypothesis.
+
+
+>**T-test (``stats.ttest_1samp(data, mu_0)``)**: Performs a one-sample t-test to test if the mean of data differs from mu_0.
+
+
+> A **t-test** is an inferential statistic used to determine if there is a significant difference between the means of two groups and how they are related.
+
+>Hypothesis testing is essential for making inferences about populations based on sample data. The t-test checks if data's mean significantly differs from mu_0, helping determine if observed differences are likely due to random variation or indicate a meaningful effect.
