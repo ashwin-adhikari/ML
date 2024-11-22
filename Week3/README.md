@@ -85,3 +85,33 @@ Q3 = np.quantile(covid_data["new_cases"],0.75)
 IQR = Q3 - Q1
 
 ```
+
+## Data Splitting Techniques
+In data science or machine learning, data splitting comes into the picture when the given data is divided into two or more subsets so that a model can get trained, tested and evaluated.
+- If two splits are there, it means one will be utilised for training and another one will be used for testing, or,
+- If three splits are there will mean there are training, testing and validation sets.
+
+### Simple Random Split
+```python
+from sklearn.model_selection import train_test_split
+# Assuming df is your DataFrame
+train_set, test_set = train_test_split(df, test_size=0.2, random_state=42)
+```
+The ``random_state`` is a pseudo-random number parameter that allows us to reproduce the same train test split each time you run the code.
+
+### Stratified Random Split
+```python
+from sklearn.model_selection import StratifiedShuffleSplit
+
+split = StratifiedShuffleSplit(n_splits=1, test_size=0.2, random_state=42)
+for train_index, test_index in split.split(df, df["stratum_column"]):
+        strat_train_set = df.loc[train_index]
+        strat_test_set = df.loc[test_index]
+```
+This code demonstrates how to use ``StratifiedShuffleSplit`` to split a dataset into training and testing sets while preserving the proportions of a specific column's classes across both sets.
+
+This code ensures that both strat_train_set and strat_test_set have the same class proportions for "stratum_column" as the original dataset, making it especially useful for imbalanced data.
+
+## Advanced Splitting Techniques
+### K-Fold Cross-Validation
+K-Fold Cross-Validation is a technique in machine learning used to evaluate the performance of a model by dividing the dataset into ``K`` equal-sized subsets, or "folds." The model is trained and evaluated ``K`` times, each time using a different fold as the test set and the remaining ``K-1`` folds as the training set repeated ``K`` times.
