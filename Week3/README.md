@@ -115,3 +115,100 @@ This code ensures that both strat_train_set and strat_test_set have the same cla
 ## Advanced Splitting Techniques
 ### K-Fold Cross-Validation
 K-Fold Cross-Validation is a technique in machine learning used to evaluate the performance of a model by dividing the dataset into ``K`` equal-sized subsets, or "folds." The model is trained and evaluated ``K`` times, each time using a different fold as the test set and the remaining ``K-1`` folds as the training set repeated ``K`` times.
+
+>Each data point is used for both training and validation.
+
+#### Steps in K-Fold Cross-Validation
+1. Divide the Dataset: Split the data into K equal parts, or "folds."
+2. Train and Test on Each Fold:
+    - For each fold (from 1 to K):
+        - Use the current fold as the test set.
+        - Use the remaining K-1 folds as the training set.
+         - Train the model on the training set and evaluate it on the test set.
+3. Average the Results: After running K experiments, calculate the average performance across all folds to get a more accurate measure of the model’s performance.
+
+```python
+from sklearn.model_selection import KFold, cross_val_score
+from sklearn.ensemble import RandomForestClassifier
+
+model = RandomForestClassifier(random_state=42)
+kf = KFold(n_splits=5, random_state=42, shuffle=True)
+scores = cross_val_score(model, df_features, df_target, cv=kf)
+
+print("Cross-validation scores:", scores)
+```
+Here ``n_splits`` is the value of K, increasing the value of K increases the accuracy of the model.
+
+### Stratified Cross-Validation
+Stratified Cross-Validation is a variation of K-Fold Cross-Validation that ensures each fold has approximately the same percentage of samples for each class as in the full dataset. This is particularly useful for datasets with imbalanced classes, where some classes are underrepresented.<br>
+In standard K-Fold Cross-Validation, each fold is selected randomly, so there’s no guarantee that each class’s proportion is consistent across folds. Stratified Cross-Validation solves this by maintaining the class distribution in each fold.
+
+>Essential for datasets with imbalanced classes
+
+#### How Stratified Cross-Validation Works
+
+1. **Divide Dataset into Folds with Proportionate Class Distribution**: The data is split into K folds, with each fold keeping the same class distribution as the entire dataset.
+2. **Train and Test on Each Fold**: For each fold, train the model on K-1 folds and test it on the remaining fold. Repeat this K times.
+3. **Average Results Across Folds**: Compute the average performance across all K folds, resulting in a more reliable performance estimate, especially with imbalanced classes.
+
+```python
+skf = StratifiedKFold(n_splits=5,shuffle=True,random_state=1)
+```
+### Blocked Cross-Validation
+Blocked Cross-Validation is a cross-validation technique designed for datasets where the order of data points matters, such as time-series data. In time-series data, observations are not independent of each other (e.g., stock prices, weather data), so the data needs to be split in a way that respects the temporal order to avoid data leakage.
+
+>Ideal for grouped data, such as repeated measurements from the same subject.
+#### How Blocked Cross-Validation Works
+
+1. **Define Blocks**: The data is divided into separate, non-overlapping blocks based on the inherent structure of the data (e.g., by time or location).
+2. **Train and Test on Blocks**:
+        - For each block, train the model on the data outside the current block and use the block as the test set.
+3. **Repeat for Each Block**: Continue this process, treating each block as the test set once while training on the other blocks.
+4. **Average the Results**: After testing on all blocks, average the performance metrics across all test blocks for an overall evaluation.
+
+### Rolling Cross-Validation
+Rolling Cross-Validation, also known as Time-Series Cross-Validation or Rolling Window Cross-Validation, is a technique designed specifically for time-series data or any data where observations are sequentially dependent. In rolling cross-validation, training and test sets are created by sequentially moving a "window" through time, training on one period and testing on the next, then shifting the window forward.
+
+>**Purpose**: Rolling cross-validation is designed to assess the performance of machine learning models on sequential data. It helps in understanding how well a model can predict future values based on past observations.
+
+>**Methodology**: The process involves iteratively expanding the training set while moving the validation set forward in time. This allows the model to be trained on all available data up to a certain point before testing it on the next observation(s).
+
+#### Example of Rolling Cross-Validation
+
+1. Iteration 1:
+    - Training set: Data from Year 1
+    - Validation set: Data from Year 2
+2. Iteration 2:
+    - Training set: Data from Years 1 and 2
+    - Validation set: Data from Year 3
+3. Iteration 3:
+    - Training set: Data from Years 1, 2, and 3
+    - Validation set: Data from Year 4
+
+This pattern continues until the last observation is reached.
+
+```python
+# Parameters for the rolling window
+train_size = 50     # Initial training window size
+test_size = 10      # Size of each test set
+n_splits = (len(data) - train_size) // test_size  # Number of rolling iterations
+
+# List to store the results
+mse_scores = []
+
+# Perform rolling cross-validation
+for i in range(n_splits):
+    # Define training and test sets for the current window
+    train_end = train_size + i * test_size
+    test_end = train_end + test_size
+    X_train, X_test = data.iloc[:train_end], data.iloc[train_end:test_end]
+    
+    # Train a simple model
+    model = RandomForestRegressor(random_state=1)
+    model.fit(X_train.index.values.reshape(-1, 1), X_train['value'])
+    
+    # Make predictions and evaluate
+    predictions = model.predict(X_test.index.values.reshape(-1, 1))
+    mse = mean_squared_error(X_test['value'], predictions)
+    mse_scores.append(mse)
+```
