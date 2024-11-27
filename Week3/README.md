@@ -212,3 +212,131 @@ for i in range(n_splits):
     mse = mean_squared_error(X_test['value'], predictions)
     mse_scores.append(mse)
 ```
+
+# Advanced Techniques for Handling Missing Data in Python
+### Types of Missing Data
+- **Missing Completely at Random (MCAR)**: No relationship with any other data.
+- **Missing at Random (MAR)**: Missingness related to observed data.
+- **Missing Not at Random (MNAR)**: Missingness related to unobserved data.
+
+## Basic Imputation Techniques
+
+1.  ### **Mean/Median Imputation**:
+    - Use when: Data is MCAR and normally distributed.
+    - Best Practice: Use median for skewed data.
+
+```python
+titanic_data['Age'].fillna(titanic_data['Age'].median(), inplace=True)
+```
+Filling missing data is important step for preparing dataset for training and analysis. Choice of imputation technique depends on the nature of the data and the specific column with missing values.
+
+#### **Why Use Median for Age:**
+
+- **Robust to Outliers**: The median is less sensitive to outliers compared to the mean. In datasets where age might have extreme values or a skewed distribution, using the median ensures that the imputed values are not unduly influenced by these extremes.
+
+- **Dealing with MCAR or MAR**: If the missingness in the ‘Age’ column is MCAR (Missing Completely at Random) or MAR (Missing at Random), median imputation provides a reasonable estimate that preserves the central tendency of the data.
+
+2. ### Mode Imputation:
+- Use when: Best for categorical data..
+```python
+embarked_mode = titanic_data['Embarked'].mode()[0]
+titanic_data['Embarked'].fillna(embarked_mode, inplace=True)
+```
+#### Why Use Mode for Cabin:
+
+- Categorical Data: ‘Embarked’ is a categorical variable (representing different embarkation points). For categorical data, mean and median are not applicable. The mode, which is the most frequently occurring category, is a natural choice for imputation.
+
+- Preserving the Most Common Category: By using the mode, you maintain the original distribution of the data as closely as possible. It ensures that the statistical and structural integrity of the ‘Embarked’ column is maintained post-imputation.
+
+- Handling MCAR/MAR: If the data is MCAR or MAR, replacing missing values with the most
+
+3. ### KNN Imputation:
+KNN (K-Nearest Neighbors) Imputation is a method to fill in missing data by looking at the closest neighbors. Think of it as finding people similar to you (neighbors) and using their information to guess what’s missing in your data.
+- Use when: Data has identifiable patterns.
+```python
+from sklearn.impute import KNNImputer
+
+imputer = KNNImputer(n_neighbors=3)
+numeric_columns = titanic_data.select_dtypes(include=['float64', 'int64'])
+titanic_data[numeric_columns.columns] = imputer.fit_transform(numeric_columns)
+```
+
+#### How and Why to Use KNN Imputation
+- **Mechanism**: 
+    - **Find Neighbors**: It looks at other data points (rows) in your dataset that are the most similar to the one with missing values.
+    - **Use Neighbors to Fill the Gaps**: It takes the values from these similar data points to estimate and fill in the missing value.
+
+    For example: If you're missing your favorite fruit in a survey, KNN might look at what people with similar preferences to you like, and assume you’d like the same.
+
+- **Applicability**: This method is particularly useful when the data exhibits a pattern or relationship, such as in cases where similar observations have similar types of values.
+
+- **Choosing ‘k’**: The choice of ‘k’ (number of neighbors) is crucial. 
+    - **Small ‘k’ (fewer neighbors)**: Captures more detail but may overfit (too specific to a small group).
+    - **Large ‘k’ (more neighbors)**: Smooths things out but might miss some subtle differences.
+
+- **Distance Metric**: KNN uses a distance metric (like Euclidean distance) to find the closest neighbors. The choice of the distance metric can significantly impact the imputation. The closer two points are, the more similar they are considered.
+- **Why Use KNN Imputation?**: It keeps the relationships and patterns in your data intact.It's flexible and works for many types of data.
+> Keep in Mind:<br>
+>It can be slow for very large datasets (because it compares each point with all others).<br>
+>Choosing the right ‘k’ and distance metric is key to good results.
+
+4. ### Regression Imputation:
+Regression imputation is a method for filling in missing data by predicting the missing value using a regression model. 
+- Use when: The missingness is MAR (Missing at Random) and can be predicted using other variables in the dataset.
+
+- How Does It Work?
+    1. Build a Regression Model:
+        Use the rows that have all the data (no missing values) to create a predictive model. For instance:
+            - Predict weight based on height, age, and gender.
+            - The formula might look like:
+            `` Weight = 2.5 * Height + 0.8 * Age - 5 * Gender + Error``
+
+    2. Predict the Missing Values:
+    Once the model is built, it predicts the missing values using the information from the other columns.
+
+    Example:
+    Imagine a dataset with three columns: Age, Height, and Weight, but some rows are missing Weight.
+
+    1. Use rows where you know Weight to build a regression model:
+    ``Weight = f(Age, Height)``
+
+    2. For rows where Weight is missing:
+        Plug in the Age and Height to predict Weight using the regression equation.
+
+- When to Use Regression Imputation?
+
+    - When there’s a strong relationship between the variable with missing data and other variables in your dataset.
+    Example: If you know height and age are good predictors of weight.
+
+## Handling MNAR Data (Missing Not at Random)
+When dealing with Missing Not at Random (MNAR) data, the missingness is related to the unobserved data itself. This type of missing data requires more sophisticated approaches, such as data augmentation or model-based methods.
+1. ### Data Augmentation Methods
+Data augmentation involves creating additional data samples from your existing dataset. It’s commonly used in machine learning, especially for images, text, and audio, to increase the diversity and size of the training data, helping models generalize better.
+
+Choosing the right augmentation methods depends on your data type and problem. For example, image tasks often rely on geometric transformations, while text tasks use synonym replacement and back translation.
+
+2. ### Model-Based Methods
+These methods involve building statistical models that directly account for the mechanism of missingness. Commonly used in scenarios where the reasons for missingness are complex and intertwined with the unobserved values.
+Some of the model-based methods are : 
+- Multiple imputation:
+    Instead of filling in missing values once, multiple imputation creates several datasets with different imputed values.
+- Expectation-Maximization(EM) Algorithm:
+    EM is an iterative technique that estimates missing data and model parameters simultaneously.
+    - Expectation Step: Estimate missing values based on observed data and current model parameters.
+    - Maximization Step: Update model parameters using the completed dataset.
+    - Repeat until the model converges.
+- Matrix Factorization:
+    Common in recommender systems, this approach decomposes a matrix (e.g., user-item interactions) into latent factors and uses them to predict missing values.<br>
+    **Example**: In a user-movie rating matrix, predict missing ratings by learning patterns in existing ratings.
+- K-Nearest Neighbors(KNN) Imputation:
+    This method uses the closest data points (neighbors) to fill in missing values based on a similarity metric (e.g., Euclidean distance).
+
+- Regression Imputation:
+    Use regression models to predict missing values based on other variables in the dataset.
+
+- Neural Network-Based Methods:
+    Neural networks can model complex, nonlinear relationships to estimate missing values. Autoencoders, for example, can reconstruct incomplete data by learning a compressed representation.
+
+- Bayesian Methods:
+    Use Bayesian inference to model the distribution of missing data and estimate its values probabilistically.
+    **Example**: Use Gibbs Sampling to estimate missing values iteratively.
